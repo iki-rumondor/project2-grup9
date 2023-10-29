@@ -2,6 +2,7 @@ package customHTTP
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
@@ -27,7 +28,7 @@ func (h *PhotoHandler) CreatePhoto(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	defer utils.Recovery(c)
 
-	var body request.CreatePhoto
+	var body request.Photo
 	if err := c.BindJSON(&body); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
 			Message: err.Error(),
@@ -42,14 +43,14 @@ func (h *PhotoHandler) CreatePhoto(c *gin.Context) {
 		return
 	}
 
-	user := domain.Photo{
+	photo := domain.Photo{
 		Title:    body.Title,
 		Caption:  body.Caption,
 		PhotoUrl: body.PhotoUrl,
 		UserID:   userID,
 	}
 
-	result, err := h.Service.CreatePhoto(&user)
+	result, err := h.Service.CreatePhoto(&photo)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
@@ -84,7 +85,7 @@ func (h *PhotoHandler) GetPhotos(c *gin.Context) {
 
 	var photos response.Photos
 
-	for _, photo := range *result{
+	for _, photo := range *result {
 		photos.Photos = append(photos.Photos, &response.Photo{
 			ID:        photo.ID,
 			Title:     photo.Title,
@@ -99,5 +100,56 @@ func (h *PhotoHandler) GetPhotos(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusCreated, photos.Photos)
+	c.JSON(http.StatusOK, photos.Photos)
+}
+
+func (h *PhotoHandler) UpdatePhoto(c *gin.Context) {
+
+	var body request.Photo
+	if err := c.BindJSON(&body); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	if _, err := govalidator.ValidateStruct(&body); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	urlParam := c.Param("id")
+	photoID, err := strconv.Atoi(urlParam)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
+			Message: "please check the url and ensure it follows the correct format",
+		})
+		return
+	}
+
+	photo := domain.UpdatePhoto{
+		ID:       uint(photoID),
+		Title:    body.Title,
+		Caption:  body.Caption,
+		PhotoUrl: body.PhotoUrl,
+	}
+
+	result, err := h.Service.UpdatePhoto(&photo)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response.UpdatePhoto{
+		ID:        result.ID,
+		Title:     result.Title,
+		Caption:   result.Caption,
+		PhotoUrl:  result.PhotoUrl,
+		UserID:    result.UserID,
+		UpdatedAt: result.UpdatedAt,
+	})
 }

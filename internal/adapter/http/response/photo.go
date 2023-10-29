@@ -11,6 +11,15 @@ type CreatePhoto struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type UpdatePhoto struct {
+	ID        uint      `json:"id"`
+	Title     string    `json:"title"`
+	Caption   string    `json:"caption"`
+	PhotoUrl  string    `json:"photo_url"`
+	UserID    uint      `json:"user_id"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type Photo struct{
 	ID        uint      `json:"id"`
 	Title     string    `json:"title"`

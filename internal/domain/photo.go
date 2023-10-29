@@ -13,3 +13,12 @@ type Photo struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type UpdatePhoto struct {
+	ID          uint
+	Title       string
+	Caption     string
+	PhotoUrl    string
+	
+	UpdatedAt time.Time
+}

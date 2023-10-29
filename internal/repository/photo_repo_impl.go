@@ -15,12 +15,23 @@ func NewPhotoRepository(db *gorm.DB) PhotoRepository {
 	}
 }
 
-func (r *PhotoRepoImplementation) Save(photo *domain.Photo) (*domain.Photo, error) {
-	if err := r.db.Save(photo).Error; err != nil {
+func (r *PhotoRepoImplementation) Create(photo *domain.Photo) (*domain.Photo, error) {
+
+	if err := r.db.Save(&photo).Error; err != nil {
 		return nil, err
 	}
 
 	return photo, nil
+}
+
+func (r *PhotoRepoImplementation) Update(photo *domain.UpdatePhoto) (*domain.Photo, error) {
+
+	var result domain.Photo
+	if err := r.db.Model(&domain.Photo{}).Where("id = ?", photo.ID).Updates(&photo).First(&result).Error; err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 func (r *PhotoRepoImplementation) FindUser(id uint) (*domain.User, error) {
@@ -39,4 +50,13 @@ func (r *PhotoRepoImplementation) FindPhotos(userID uint) (*[]domain.Photo, erro
 	}
 
 	return &photos, nil
+}
+
+func (r *PhotoRepoImplementation) FindPhoto(photoID uint) (*domain.Photo, error) {
+	var photo domain.Photo
+	if err := r.db.First(&photo, "id = ?", photoID).Error; err != nil {
+		return nil, err
+	}
+
+	return &photo, nil
 }
