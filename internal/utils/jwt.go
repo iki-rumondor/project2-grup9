@@ -6,7 +6,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-var secretKey = "mostSecret"
+var secretKey = "mostSecrett"
 
 func GenerateToken(data map[string]interface{}) (string, error) {
 	claims := jwt.MapClaims(data)
@@ -32,7 +32,7 @@ func VerifyToken(strToken string) (jwt.MapClaims, error) {
 	mapClaims, ok := token.Claims.(jwt.MapClaims)
 
 
-	if !ok && !token.Valid {
+	if !ok || !token.Valid {
 		return nil, errResponse
 	}
 

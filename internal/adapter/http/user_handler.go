@@ -50,10 +50,12 @@ func (h *UserHandler) Register(c *gin.Context) {
 	}
 
 	response := response.User{
-		Age:      result.Age,
-		Email:    result.Email,
-		ID:       result.ID,
-		Username: result.Username,
+		Age:       result.Age,
+		Email:     result.Email,
+		ID:        result.ID,
+		Username:  result.Username,
+		CreatedAt: result.CreatedAt,
+		UpdatedAt: result.UpdatedAt,
 	}
 
 	c.JSON(http.StatusCreated, response)
@@ -139,8 +141,8 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	mapClaims, err := utils.VerifyToken(c.GetString("jwt"))
-	defer func(){
-		if r := recover(); r != nil{
+	defer func() {
+		if r := recover(); r != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 				Message: "something went wrong, please check your credentials",
 			})
@@ -161,7 +163,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		ID: userID,
 	}
 
-	if err := h.Service.DeleteUser(&user); err != nil{
+	if err := h.Service.DeleteUser(&user); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})
@@ -169,6 +171,6 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.Message{
-		Message: "deleted has been successfully",
+		Message: "Your account has been successfully deleted",
 	})
-} 
+}
