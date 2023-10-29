@@ -16,16 +16,20 @@ func NewPhotoRepository(db *gorm.DB) PhotoRepository {
 }
 
 func (r *PhotoRepoImplementation) Create(photo *domain.Photo) (*domain.Photo, error) {
-
 	if err := r.db.Save(&photo).Error; err != nil {
 		return nil, err
 	}
-
 	return photo, nil
 }
 
-func (r *PhotoRepoImplementation) Update(photo *domain.UpdatePhoto) (*domain.Photo, error) {
+func (r *PhotoRepoImplementation) Delete(photo *domain.Photo) error {
+	if err := r.db.Delete(&photo).Error; err != nil {
+		return err
+	}
+	return nil
+}
 
+func (r *PhotoRepoImplementation) Update(photo *domain.UpdatePhoto) (*domain.Photo, error) {
 	var result domain.Photo
 	if err := r.db.Model(&domain.Photo{}).Where("id = ?", photo.ID).Updates(&photo).First(&result).Error; err != nil {
 		return nil, err

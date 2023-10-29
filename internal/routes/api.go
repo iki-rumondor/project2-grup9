@@ -27,6 +27,7 @@ func StartServer(handler *customHTTP.Handlers) *gin.Engine {
 		photos.POST("/", handler.PhotoHandler.CreatePhoto)
 		photos.GET("/", handler.PhotoHandler.GetPhotos)
 		photos.PUT("/:id", handler.PhotoHandler.UpdatePhoto)
+		photos.DELETE("/:id", handler.PhotoHandler.DeletePhoto)
 	}
 
 	return router

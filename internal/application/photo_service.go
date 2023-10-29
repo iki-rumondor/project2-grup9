@@ -42,10 +42,10 @@ func (s *PhotoService) GetPhotos(userID uint) (*[]domain.Photo, error) {
 func (s *PhotoService) UpdatePhoto(photo *domain.UpdatePhoto) (*domain.Photo, error) {
 
 	_, err := s.Repo.FindPhoto(photo.ID)
+
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, fmt.Errorf("photo with id %d id not found", photo.ID)
 	}
-
 	if err != nil {
 		return nil, errors.New("failed to get photo from database")
 	}
@@ -56,4 +56,22 @@ func (s *PhotoService) UpdatePhoto(photo *domain.UpdatePhoto) (*domain.Photo, er
 	}
 
 	return photos, nil
+}
+
+func (s *PhotoService) DeletePhoto(photo *domain.Photo) error {
+
+	_, err := s.Repo.FindPhoto(photo.ID)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return fmt.Errorf("photo with id %d id not found", photo.ID)
+	}
+	if err != nil {
+		return errors.New("failed to get photo from database")
+	}
+
+	if err := s.Repo.Delete(photo); err != nil {
+		return errors.New("we encountered an issue while trying to delete the photo")
+	}
+
+	return nil
 }

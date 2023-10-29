@@ -153,3 +153,30 @@ func (h *PhotoHandler) UpdatePhoto(c *gin.Context) {
 		UpdatedAt: result.UpdatedAt,
 	})
 }
+
+func (h *PhotoHandler) DeletePhoto(c *gin.Context) {
+
+	urlParam := c.Param("id")
+	photoID, err := strconv.Atoi(urlParam)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
+			Message: "please check the url and ensure it follows the correct format",
+		})
+		return
+	}
+
+	photo := domain.Photo{
+		ID: uint(photoID),
+	}
+
+	if err := h.Service.DeletePhoto(&photo); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response.Message{
+		Message: "Your photo has been successfully deleted",
+	})
+}
