@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
@@ -9,9 +10,9 @@ import (
 	"github.com/iki-rumondor/project2-grup9/internal/adapter/http/response"
 )
 
-func ValidateRegister() gin.HandlerFunc {
+func AllUserData() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var body request.Register
+		var body request.AllUserData
 		if err := c.BindJSON(&body); err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, response.ErrorMessage{
 				Message: err.Error(),
@@ -26,14 +27,14 @@ func ValidateRegister() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("register", body)
+		c.Set("userData", body)
 		c.Next()
 	}
 }
 
-func ValidateLogin() gin.HandlerFunc {
+func UserWithEmail() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var body request.Login
+		var body request.UserWithEmail
 		if err := c.BindJSON(&body); err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, response.ErrorMessage{
 				Message: err.Error(),
@@ -48,7 +49,26 @@ func ValidateLogin() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("login", body)
+		c.Set("userWithEmail", body)
+		c.Next()
+	}
+}
+
+func ValidateHeader() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var headerToken = c.Request.Header.Get("Authorization")
+		var bearer = strings.HasPrefix(headerToken, "Bearer")
+
+		if !bearer {
+			c.AbortWithStatusJSON(http.StatusBadRequest, response.ErrorMessage{
+				Message: "Bearer token is not valid",
+			})
+			return
+		}
+
+		stringToken := strings.Split(headerToken, " ")[1]
+
+		c.Set("jwt", stringToken)
 		c.Next()
 	}
 }

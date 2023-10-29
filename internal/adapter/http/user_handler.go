@@ -8,6 +8,7 @@ import (
 	"github.com/iki-rumondor/project2-grup9/internal/adapter/http/response"
 	"github.com/iki-rumondor/project2-grup9/internal/application"
 	"github.com/iki-rumondor/project2-grup9/internal/domain"
+	"github.com/iki-rumondor/project2-grup9/internal/utils"
 )
 
 type UserHandler struct {
@@ -22,7 +23,7 @@ func NewHandler(service *application.UserService) *UserHandler {
 
 func (h *UserHandler) Register(c *gin.Context) {
 
-	body, ok := c.Get("register")
+	body, ok := c.Get("userData")
 
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorMessage{
@@ -31,7 +32,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	var register = body.(request.Register)
+	var register = body.(request.AllUserData)
 
 	user := domain.User{
 		Username: register.Username,
@@ -59,7 +60,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 }
 
 func (h *UserHandler) Login(c *gin.Context) {
-	body, ok := c.Get("login")
+	body, ok := c.Get("userWithEmail")
 
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorMessage{
@@ -68,7 +69,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	var login = body.(request.Login)
+	var login = body.(request.UserWithEmail)
 
 	user := domain.User{
 		Email:    login.Email,
@@ -86,5 +87,52 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response.JWT{
 		Token: jwt,
+	})
+}
+
+func (h *UserHandler) UpdateUser(c *gin.Context) {
+	mapClaims, err := utils.VerifyToken(c.GetString("jwt"))
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorMessage{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	body, ok := c.Get("userWithEmail")
+
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorMessage{
+			Message: "something went wrong at user service",
+		})
+		return
+	}
+
+	var user = body.(request.UserWithEmail)
+
+	userID := uint(mapClaims["id"].(float64))
+
+	req := domain.User{
+		ID:       userID,
+		Email:    user.Email,
+		Password: user.Password,
+	}
+
+	result, err := h.Service.UpdateUser(&req)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorMessage{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response.UpdatedUser{
+		ID:        result.ID,
+		Email:     result.Email,
+		Username:  result.Username,
+		Age:       result.Age,
+		UpdatedAt: result.UpdatedAt,
 	})
 }

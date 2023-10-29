@@ -9,10 +9,12 @@ import (
 func StartServer(handler *customHTTP.UserHandler) *gin.Engine {
 	router := gin.Default()
 
-	users := router.Group("users")
+	public_users := router.Group("users")
+	users := router.Group("users").Use(middleware.ValidateHeader())
 	{
-		users.POST("/register", middleware.ValidateRegister(), handler.Register)
-		users.POST("/login", middleware.ValidateLogin(), handler.Login)
+		public_users.POST("/register", middleware.AllUserData(), handler.Register)
+		public_users.POST("/login", middleware.UserWithEmail(), handler.Login)
+		users.PUT("/", middleware.UserWithEmail(), handler.UpdateUser)
 	}
 
 	return router

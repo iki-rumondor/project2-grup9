@@ -18,9 +18,15 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) error {
+type UpdateUser struct {
+	ID        uint
+	Email     string
+	Password  string
+}
+
+func (u *User) BeforeSave(tx *gorm.DB) error {
 	hashPass, err := utils.HashPassword(u.Password)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 	u.Password = hashPass
