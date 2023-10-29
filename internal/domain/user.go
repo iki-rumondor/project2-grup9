@@ -13,6 +13,7 @@ type User struct {
 	Email    string `gorm:"unique;not_null; varchar(120)"`
 	Password string `gorm:"not_null; varchar(120)"`
 	Age      uint
+	Photos []Photo
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

@@ -10,6 +10,7 @@ import (
 	"github.com/iki-rumondor/project2-grup9/internal/repository"
 	"github.com/iki-rumondor/project2-grup9/internal/routes"
 	"github.com/iki-rumondor/project2-grup9/internal/utils"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -19,13 +20,37 @@ func main() {
 		return
 	}
 
-	gormDB.Debug().AutoMigrate(domain.User{})
+	// migration(gormDB)
 
-	repo := repository.NewRepository(gormDB)
-	service := application.NewService(repo)
-	handler := customHTTP.NewHandler(service)
+	userRepo := repository.NewUserRepository(gormDB)
+	userService := application.NewUserService(userRepo)
+	userHandler := customHTTP.NewUserHandler(userService)
+
+	photoRepo := repository.NewPhotoRepository(gormDB)
+	photoService := application.NewPhotoService(photoRepo)
+	photoHandler := customHTTP.NewPhotoHandler(photoService)
+
+	handlers := customHTTP.Handlers{
+		UserHandler:  userHandler,
+		PhotoHandler: photoHandler,
+	}
+
 	utils.NewCustomValidator(gormDB)
 
 	var PORT = ":8080"
-	routes.StartServer(handler).Run(PORT)
+	routes.StartServer(&handlers).Run(PORT)
+}
+
+func migration(db *gorm.DB) {
+	migrate := db.Debug().Migrator()
+	migrate.DropTable(domain.User{}, domain.Photo{})
+	migrate.CreateTable(domain.User{}, domain.Photo{})
+	// db.Create(domain.User{
+	// 	Age:       12,
+	// 	Email:     "iki@gmail.id",
+	// 	Password:  "123456",
+	// 	Username:  "ilham",
+	// 	CreatedAt: time.Now(),
+	// 	UpdatedAt: time.Now(),
+	// })
 }

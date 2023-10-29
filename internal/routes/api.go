@@ -6,16 +6,26 @@ import (
 	"github.com/iki-rumondor/project2-grup9/internal/adapter/middleware"
 )
 
-func StartServer(handler *customHTTP.UserHandler) *gin.Engine {
+func StartServer(handler *customHTTP.Handlers) *gin.Engine {
+	
 	router := gin.Default()
 
-	public_users := router.Group("users")
+	public := router.Group("")
+	{
+		public.POST("users/register", middleware.AllUserData(), handler.UserHandler.Register)
+		public.POST("users/login", middleware.UserWithEmail(), handler.UserHandler.Login)
+	}
+
 	users := router.Group("users").Use(middleware.ValidateHeader())
 	{
-		public_users.POST("/register", middleware.AllUserData(), handler.Register)
-		public_users.POST("/login", middleware.UserWithEmail(), handler.Login)
-		users.PUT("/", middleware.UserWithEmail(), handler.UpdateUser)
-		users.DELETE("/", handler.DeleteUser)
+		users.PUT("/", middleware.UserWithEmail(), handler.UserHandler.UpdateUser)
+		users.DELETE("/", middleware.GetUserID(), handler.UserHandler.DeleteUser)
+	}
+
+	photos := router.Group("photos").Use(middleware.ValidateHeader(), middleware.GetUserID())
+	{
+		photos.POST("/", handler.PhotoHandler.CreatePhoto)
+		photos.GET("/", handler.PhotoHandler.GetPhotos)
 	}
 
 	return router

@@ -23,4 +23,3 @@ func NewCustomValidator(gormDB *gorm.DB) {
 
 	govalidator.ParamTagRegexMap["unique"] = regexp.MustCompile("^unique\\((\\w+)\\.(\\w+)\\)$")
 }
-

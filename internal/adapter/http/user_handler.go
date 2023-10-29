@@ -15,7 +15,7 @@ type UserHandler struct {
 	Service *application.UserService
 }
 
-func NewHandler(service *application.UserService) *UserHandler {
+func NewUserHandler(service *application.UserService) *UserHandler {
 	return &UserHandler{
 		Service: service,
 	}
@@ -140,24 +140,15 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 }
 
 func (h *UserHandler) DeleteUser(c *gin.Context) {
-	mapClaims, err := utils.VerifyToken(c.GetString("jwt"))
-	defer func() {
-		if r := recover(); r != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
-				Message: "something went wrong, please check your credentials",
-			})
-			return
-		}
-	}()
 
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, response.Message{
-			Message: err.Error(),
+	userID := c.GetUint("user_id")
+	if userID == 0{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
+			Message: "opps.. something went wrong, please check your request!!",
 		})
 		return
 	}
-
-	userID := uint(mapClaims["id"].(float64))
+	defer utils.Recovery(c)
 
 	user := domain.User{
 		ID: userID,
