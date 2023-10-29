@@ -14,14 +14,14 @@ func AllUserData() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body request.AllUserData
 		if err := c.BindJSON(&body); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, response.ErrorMessage{
+			c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
 				Message: err.Error(),
 			})
 			return
 		}
 
 		if _, err := govalidator.ValidateStruct(&body); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, response.ErrorMessage{
+			c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
 				Message: err.Error(),
 			})
 			return
@@ -36,14 +36,14 @@ func UserWithEmail() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body request.UserWithEmail
 		if err := c.BindJSON(&body); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, response.ErrorMessage{
+			c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
 				Message: err.Error(),
 			})
 			return
 		}
 
 		if _, err := govalidator.ValidateStruct(&body); err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, response.ErrorMessage{
+			c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
 				Message: err.Error(),
 			})
 			return
@@ -60,7 +60,7 @@ func ValidateHeader() gin.HandlerFunc {
 		var bearer = strings.HasPrefix(headerToken, "Bearer")
 
 		if !bearer {
-			c.AbortWithStatusJSON(http.StatusBadRequest, response.ErrorMessage{
+			c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
 				Message: "Bearer token is not valid",
 			})
 			return

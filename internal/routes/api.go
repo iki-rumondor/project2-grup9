@@ -15,6 +15,7 @@ func StartServer(handler *customHTTP.UserHandler) *gin.Engine {
 		public_users.POST("/register", middleware.AllUserData(), handler.Register)
 		public_users.POST("/login", middleware.UserWithEmail(), handler.Login)
 		users.PUT("/", middleware.UserWithEmail(), handler.UpdateUser)
+		users.DELETE("/", handler.DeleteUser)
 	}
 
 	return router

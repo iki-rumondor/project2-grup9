@@ -56,8 +56,7 @@ func (s *UserService) VerifyUser(user *domain.User) (string, error) {
 
 func (s *UserService) UpdateUser(user *domain.User) (*domain.User, error) {
 
-	_, err := s.Repo.FindByID(user.ID)
-	if err != nil {
+	if _, err := s.Repo.FindByID(user.ID); err != nil {
 		return nil, fmt.Errorf("user with id %d is not found", user.ID)
 	}
 
@@ -71,4 +70,17 @@ func (s *UserService) UpdateUser(user *domain.User) (*domain.User, error) {
 	}
 
 	return result, nil
+}
+
+func (s *UserService) DeleteUser(user *domain.User) error {
+
+	if _, err := s.Repo.FindByID(user.ID); err != nil {
+		return fmt.Errorf("user with id %d is not found", user.ID)
+	}
+
+	if err := s.Repo.Delete(user); err != nil {
+		return errors.New("we encountered an issue while trying to delete the user")
+	}
+
+	return nil
 }

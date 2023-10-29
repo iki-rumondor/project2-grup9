@@ -17,6 +17,32 @@ func NewRepository(db *gorm.DB) UserRepository {
 	}
 }
 
+func (r *UserRepoImplementation) Save(user *domain.User) (*domain.User, error) {
+	if err := r.db.Save(user).Error; err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (r *UserRepoImplementation) Update(user *domain.User) (*domain.User, error) {
+	var updatedUser domain.User
+	if err := r.db.Updates(user).First(&updatedUser).Error; err != nil {
+		return nil, err
+	}
+
+	return &updatedUser, nil
+}
+
+func (r *UserRepoImplementation) Delete(user *domain.User) error {
+	
+	if err := r.db.Delete(user).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *UserRepoImplementation) FindByEmail(email string) (*domain.User, error) {
 	var user domain.User
 	if err := r.db.First(&user, "email = ?", email).Error; err != nil {
@@ -42,21 +68,4 @@ func (r *UserRepoImplementation) IsUniqueEmail(user *domain.User) bool {
 	}
 
 	return false
-}
-
-func (r *UserRepoImplementation) Save(user *domain.User) (*domain.User, error) {
-	if err := r.db.Save(user).Error; err != nil {
-		return nil, err
-	}
-
-	return user, nil
-}
-
-func (r *UserRepoImplementation) Update(user *domain.User) (*domain.User, error) {
-	var updatedUser domain.User
-	if err := r.db.Updates(user).First(&updatedUser).Error; err != nil {
-		return nil, err
-	}
-
-	return &updatedUser, nil
 }

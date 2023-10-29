@@ -26,7 +26,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 	body, ok := c.Get("userData")
 
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorMessage{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: "something went wrong at user service",
 		})
 		return
@@ -43,7 +43,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 
 	result, err := h.Service.CreateUser(&user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorMessage{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})
 		return
@@ -63,7 +63,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 	body, ok := c.Get("userWithEmail")
 
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorMessage{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: "something went wrong at user service",
 		})
 		return
@@ -79,7 +79,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 	jwt, err := h.Service.VerifyUser(&user)
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorMessage{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})
 		return
@@ -94,7 +94,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	mapClaims, err := utils.VerifyToken(c.GetString("jwt"))
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorMessage{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, response.Message{
 			Message: err.Error(),
 		})
 		return
@@ -103,7 +103,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	body, ok := c.Get("userWithEmail")
 
 	if !ok {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorMessage{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: "something went wrong at user service",
 		})
 		return
@@ -122,7 +122,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	result, err := h.Service.UpdateUser(&req)
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorMessage{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})
 		return
@@ -136,3 +136,39 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		UpdatedAt: result.UpdatedAt,
 	})
 }
+
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	mapClaims, err := utils.VerifyToken(c.GetString("jwt"))
+	defer func(){
+		if r := recover(); r != nil{
+			c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
+				Message: "something went wrong, please check your credentials",
+			})
+			return
+		}
+	}()
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, response.Message{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	userID := uint(mapClaims["id"].(float64))
+
+	user := domain.User{
+		ID: userID,
+	}
+
+	if err := h.Service.DeleteUser(&user); err != nil{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response.Message{
+		Message: "deleted has been successfully",
+	})
+} 
