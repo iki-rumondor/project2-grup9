@@ -17,10 +17,20 @@ func main() {
 		return
 	}
 
-	repo := repository.NewRepository(gormDB)
-	service := application.NewService(repo)
-	handler := customHTTP.NewHandler(service)
+	commentRepo := repository.NewRepository(gormDB)
+	commentService := application.NewCommentService(commentRepo)
+	commentHandler := customHTTP.NewCommentHandler(commentService)
+
+	socialmediaRepo := repository.NewRepository(gormDB)
+	socialmediaService := application.NewSocialMediaService(socialmediaRepo)
+	socialmediaHandler := customHTTP.NewSocialMediaHandler(socialmediaService)
+
+	handlers := customHTTP.Handlers{
+		CommentHandler:     commentHandler,
+		SocialMediaHandler: socialmediaHandler,
+	}
 
 	var PORT = ":8080"
-	routes.StartServer(handler).Run(PORT)
+	routes.StartServer(&handlers).Run(PORT)
+
 }
