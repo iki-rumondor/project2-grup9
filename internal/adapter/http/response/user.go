@@ -20,6 +20,7 @@ type UpdatedUser struct {
 }
 
 type UserProfile struct {
+	ID       uint   `gorm:"primaryKey" json:"id"`
 	Email    string `json:"email"`
 	Username string `json:"username"`
 }

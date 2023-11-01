@@ -89,9 +89,8 @@ func (h *SocialMediaHandler) GetSocialmedia(c *gin.Context) {
 			CreatedAt:      sosmed.CreatedAt,
 			UpdatedAt:      sosmed.UpdatedAt,
 			User: response.UserProfiles{
-				ID:              sosmed.UserProfiles.ID,
-				Email:           sosmed.UserProfiles.Email,
-				ProfileImageURL: sosmed.UserProfiles.ProfileImageURL,
+				ID:    sosmed.UserProfiles.ID,
+				Email: sosmed.UserProfiles.Email,
 			},
 		})
 	}

@@ -96,9 +96,9 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 			},
 			Photo: response.PhotoProfile{
 				ID:       comment.PhotoProfile.ID,
-				Tittle:   comment.PhotoProfile.Tittle,
+				Title:    comment.PhotoProfile.Title,
 				Caption:  comment.PhotoProfile.Caption,
-				PhotoURL: comment.PhotoProfile.PhotoURL,
+				PhotoUrl: comment.PhotoProfile.PhotoUrl,
 				UserID:   comment.PhotoProfile.UserID,
 			},
 		})
@@ -176,6 +176,6 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.Message{
-		Message: "Your photo has been successfully deleted",
+		Message: "Your comment has been successfully deleted",
 	})
 }
