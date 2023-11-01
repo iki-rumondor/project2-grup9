@@ -2,7 +2,7 @@ package response
 
 import "time"
 
-type UserProfile struct {
+type UserProfileWithURL struct {
 	ID              uint   `gorm:"primaryKey" json:"id"`
 	Email           string `json:"email"`
 	Username        string `json:"username"`

@@ -30,7 +30,7 @@ func main() {
 	photoService := application.NewPhotoService(photoRepo)
 	photoHandler := customHTTP.NewPhotoHandler(photoService)
   
-  commentRepo := repository.NewRepository(gormDB)
+  	commentRepo := repository.NewRepository(gormDB)
 	commentService := application.NewCommentService(commentRepo)
 	commentHandler := customHTTP.NewCommentHandler(commentService)
 

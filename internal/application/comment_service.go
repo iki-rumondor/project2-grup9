@@ -29,7 +29,7 @@ func (s *CommentService) CreateComment(comment *domain.Comment) (*domain.Comment
 	return result, nil
 }
 
-func (s *CommentService) GetComments(UserID uint) (*[]domain.Comment, error) {
+func (s *CommentService) GetComments(UserID uint) ([]*domain.Comment, error) {
 
 	comment, err := s.Repo.FindComments(UserID)
 	if err != nil {
