@@ -14,6 +14,7 @@ type User struct {
 	Password string `gorm:"not_null; varchar(120)"`
 	Age      uint
 	Photos []Photo
+  SocialMedia []SocialMedia
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -26,4 +27,5 @@ func (u *User) BeforeSave(tx *gorm.DB) error {
 	}
 	u.Password = hashPass
 	return nil
+
 }

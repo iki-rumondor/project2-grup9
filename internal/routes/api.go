@@ -29,6 +29,11 @@ func StartServer(handler *customHTTP.Handlers) *gin.Engine {
 		photos.PUT("/:id", handler.PhotoHandler.UpdatePhoto)
 		photos.DELETE("/:id", handler.PhotoHandler.DeletePhoto)
 	}
+  
+  api.GET("/comments", handler.CommentHandler.GetComments)
+	api.POST("/comments", handler.CommentHandler.CreateComment)
+	api.PUT("/comments/:id", handler.CommentHandler.UpdateComment)
+	api.DELETE("/comments/:id", handler.CommentHandler.DeleteComment)
 
 	return router
 }

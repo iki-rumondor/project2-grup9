@@ -29,8 +29,18 @@ func main() {
 	photoRepo := repository.NewPhotoRepository(gormDB)
 	photoService := application.NewPhotoService(photoRepo)
 	photoHandler := customHTTP.NewPhotoHandler(photoService)
+  
+  commentRepo := repository.NewRepository(gormDB)
+	commentService := application.NewCommentService(commentRepo)
+	commentHandler := customHTTP.NewCommentHandler(commentService)
+
+	socialmediaRepo := repository.NewRepository(gormDB)
+	socialmediaService := application.NewSocialMediaService(socialmediaRepo)
+	socialmediaHandler := customHTTP.NewSocialMediaHandler(socialmediaService)
 
 	handlers := customHTTP.Handlers{
+    CommentHandler:     commentHandler,
+		SocialMediaHandler: socialmediaHandler,
 		UserHandler:  userHandler,
 		PhotoHandler: photoHandler,
 	}
