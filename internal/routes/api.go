@@ -7,7 +7,7 @@ import (
 )
 
 func StartServer(handler *customHTTP.Handlers) *gin.Engine {
-	
+
 	router := gin.Default()
 
 	public := router.Group("")
@@ -29,11 +29,14 @@ func StartServer(handler *customHTTP.Handlers) *gin.Engine {
 		photos.PUT("/:id", handler.PhotoHandler.UpdatePhoto)
 		photos.DELETE("/:id", handler.PhotoHandler.DeletePhoto)
 	}
-  
-  	api.GET("/comments", handler.CommentHandler.GetComments)
-	api.POST("/comments", handler.CommentHandler.CreateComment)
-	api.PUT("/comments/:id", handler.CommentHandler.UpdateComment)
-	api.DELETE("/comments/:id", handler.CommentHandler.DeleteComment)
+
+	comments := router.Group("comments").Use(middleware.ValidateHeader(), middleware.GetUserID())
+	{
+		comments.GET("/", handler.CommentHandler.GetComments)
+		comments.POST("/", handler.CommentHandler.CreateComment)
+		comments.PUT("/:id", handler.CommentHandler.UpdateComment)
+		comments.DELETE("/:id", handler.CommentHandler.DeleteComment)
+	}
 
 	return router
 }

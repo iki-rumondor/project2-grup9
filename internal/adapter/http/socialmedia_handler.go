@@ -89,8 +89,8 @@ func (h *SocialMediaHandler) GetSocialmedia(c *gin.Context) {
 			CreatedAt:      sosmed.CreatedAt,
 			UpdatedAt:      sosmed.UpdatedAt,
 			User: response.UserProfiles{
-				ID:    sosmed.UserProfiles.ID,
-				Email: sosmed.UserProfiles.Email,
+				// ID:    sosmed.UserProfiles.ID,
+				// Email: sosmed.UserProfiles.Email,
 			},
 		})
 	}
@@ -159,7 +159,7 @@ func (h *SocialMediaHandler) DeleteSocialmedia(c *gin.Context) {
 		ID: uint(sosmedID),
 	}
 
-	if err := h.Service.DeleteSocialmedia(&sosmed); err != nil {
+	if err := h.Service.DeleteSocialMedia(&sosmed); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})

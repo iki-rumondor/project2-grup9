@@ -8,5 +8,6 @@ type PhotoRepository interface {
 	Delete(*domain.Photo) error
 	Update(*domain.UpdatePhoto) (*domain.Photo, error)
 	FindPhotos(uint) (*[]domain.Photo, error)
+	FindAllUserPhotos() (*[]domain.Photo, error)
 	FindPhoto(uint) (*domain.Photo, error)
 }

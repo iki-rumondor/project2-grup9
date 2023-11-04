@@ -19,10 +19,10 @@ type CreateComment struct {
 }
 
 type UpdateComment struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	Tittle    string    `json:"tittle"`
-	PhotoID   uint      `json:"photo_id"`
-	Message   string    `json:"message"`
+	ID        uint      `json:"id"`
+	Title     string    `json:"title"`
+	Caption   string      `json:"caption"`
+	PhotoUrl  string    `json:"photo_url"`
 	UserID    uint      `json:"user_id"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

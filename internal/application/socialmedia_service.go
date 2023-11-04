@@ -58,3 +58,22 @@ func (s *SocialMediaService) UpdateSocialmedia(sosmed *domain.SocialMedia) (*dom
 
 	return updatedsosmed, nil
 }
+
+func (s *SocialMediaService) DeleteSocialMedia(sosmed *domain.SocialMedia) error {
+
+	_, err := s.Repo.FindSocialmedia(sosmed.ID)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return fmt.Errorf("social media with id %d id not found", sosmed.ID)
+	}
+	if err != nil {
+		return errors.New("failed to get social media from database")
+	}
+
+	if err := s.Repo.DeleteSocialmedia(sosmed); err != nil {
+		return errors.New("we encountered an issue while trying to delete the photo")
+	}
+
+	return nil
+}
+

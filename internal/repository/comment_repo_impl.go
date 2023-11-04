@@ -5,49 +5,49 @@ import (
 	"gorm.io/gorm"
 )
 
-type RepoImplementation struct {
+type CommentRepoImplementation struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) CommentRepository {
-	return &RepoImplementation{
+func NewCommentRepository(db *gorm.DB) CommentRepository {
+	return &CommentRepoImplementation{
 		db: db,
 	}
 }
 
-func (r *RepoImplementation) CreateComment(comment *domain.Comment) (*domain.Comment, error) {
-	if err := r.db.Create(&comment).Error; err != nil {
+func (r *CommentRepoImplementation) CreateComment(comment *domain.Comment) (*domain.Comment, error) {
+	if err := r.db.Save(comment).Error; err != nil {
 		return nil, err
 	}
 	return comment, nil
 }
 
-func (r *RepoImplementation) FindComment(uint) ([]domain.Comment, error) {
-	var comments []domain.Comment
+func (r *CommentRepoImplementation) FindComment(uint) (*domain.Comment, error) {
+	var comment domain.Comment
 
-	if err := r.db.Find(&comments).Error; err != nil {
+	if err := r.db.Preload("User").Preload("Photo").Find(&comment).Error; err != nil {
 		return nil, err
 	}
 
-	return comments, nil
+	return &comment, nil
 }
 
-func (r *RepoImplementation) UpdateComment(comment *domain.UpdateComment) (*domain.Comment, error) {
+func (r *CommentRepoImplementation) UpdateComment(comment *domain.Comment) (*domain.Comment, error) {
 	var result domain.Comment
-	if err := r.db.Model(&domain.Comment{}).Where("id = ?", comment.ID).Updates(&comment).First(&result).Error; err != nil {
+	if err := r.db.Model(&comment).Updates(&comment).First(&result).Error; err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func (r *RepoImplementation) DeleteComment(comment *domain.Comment) error {
+func (r *CommentRepoImplementation) DeleteComment(comment *domain.Comment) error {
 	if err := r.db.Delete(&comment).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *RepoImplementation) FindUser(id uint) (*domain.User, error) {
+func (r *CommentRepoImplementation) FindUser(id uint) (*domain.User, error) {
 	var user domain.User
 	if err := r.db.First(&user, "id = ?", id).Error; err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (r *RepoImplementation) FindUser(id uint) (*domain.User, error) {
 	return &user, nil
 }
 
-func (r *RepoImplementation) FindPhoto(id uint) (*domain.Photo, error) {
+func (r *CommentRepoImplementation) FindPhoto(id uint) (*domain.Photo, error) {
 	var photo domain.Photo
 	if err := r.db.First(&photo, "id = ?", id).Error; err != nil {
 		return nil, err
@@ -65,9 +65,17 @@ func (r *RepoImplementation) FindPhoto(id uint) (*domain.Photo, error) {
 	return &photo, nil
 }
 
-func (r *RepoImplementation) FindComments(userID uint) ([]*domain.Comment, error) {
+func (r *CommentRepoImplementation) FindComments(userID uint) ([]*domain.Comment, error) {
 	var comments []*domain.Comment
-	if err := r.db.Where("user_id = ?", userID).Find(&comments).Error; err != nil {
+	if err := r.db.Preload("User").Preload("Photo").Find(&comments, "user_id = ?", userID).Error; err != nil {
+		return nil, err
+	}
+	return comments, nil
+}
+
+func (r *CommentRepoImplementation) FindAllUserComments() ([]*domain.Comment, error) {
+	var comments []*domain.Comment
+	if err := r.db.Preload("User").Preload("Photo").Find(&comments).Error; err != nil {
 		return nil, err
 	}
 	return comments, nil

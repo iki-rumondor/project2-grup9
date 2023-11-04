@@ -24,7 +24,7 @@ func NewCommentHandler(service *application.CommentService) *CommentHandler {
 }
 
 func (h *CommentHandler) CreateComment(c *gin.Context) {
-	// userID := c.GetUint("user_id")
+	userID := c.GetUint("user_id")
 	defer utils.Recovery(c)
 
 	var body request.Comment
@@ -45,6 +45,7 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 	comment := domain.Comment{
 		Message: body.Message,
 		PhotoID: body.PhotoID,
+		UserID:  userID,
 	}
 
 	result, err := h.Service.CreateComment(&comment)
@@ -81,25 +82,25 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 
 	var comments response.Comments
 
-	for _, comment := range *result {
+	for _, comment := range result {
 		comments.Comments = append(comments.Comments, &response.Comment{
 			ID:        comment.ID,
 			Message:   comment.Message,
 			PhotoID:   comment.PhotoID,
 			UserID:    comment.UserID,
-			UpdatedAt: comment.UpdatedAt,
 			CreatedAt: comment.CreatedAt,
+			UpdatedAt: comment.UpdatedAt,
 			User: response.UserProfile{
-				ID:       comment.UserProfile.ID,
-				Email:    comment.UserProfile.Email,
-				Username: comment.UserProfile.Username,
+				ID:       comment.User.ID,
+				Email:    comment.User.Email,
+				Username: comment.User.Username,
 			},
 			Photo: response.PhotoProfile{
-				ID:       comment.PhotoProfile.ID,
-				Title:    comment.PhotoProfile.Title,
-				Caption:  comment.PhotoProfile.Caption,
-				PhotoUrl: comment.PhotoProfile.PhotoUrl,
-				UserID:   comment.PhotoProfile.UserID,
+				ID:       comment.Photo.ID,
+				Title:    comment.Photo.Title,
+				Caption:  comment.Photo.Caption,
+				PhotoUrl: comment.Photo.PhotoUrl,
+				UserID:   comment.Photo.UserID,
 			},
 		})
 	}
@@ -124,16 +125,19 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	}
 
 	urlParam := c.Param("id")
-	_, err := strconv.Atoi(urlParam)
+	id, err := strconv.Atoi(urlParam)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
 			Message: "please check the url and ensure it follows the correct format",
 		})
 		return
 	}
+	UserID := c.GetUint("user_id")
 
-	comment := domain.UpdateComment{
+	comment := domain.Comment{
+		ID:      uint(id),
 		Message: body.Message,
+		UserID:  UserID,
 	}
 
 	result, err := h.Service.UpdateComment(&comment)
@@ -144,11 +148,11 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.UpdateComment{
+	c.JSON(http.StatusOK, &response.UpdateComment{
 		ID:        result.ID,
-		Tittle:    result.Tittle,
-		PhotoID:   result.PhotoID,
-		Message:   result.Message,
+		Title:     result.Photo.Title,
+		Caption:   result.Photo.Caption,
+		PhotoUrl:  result.Photo.PhotoUrl,
 		UserID:    result.UserID,
 		UpdatedAt: result.UpdatedAt,
 	})
