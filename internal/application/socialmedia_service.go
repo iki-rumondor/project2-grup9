@@ -1,12 +1,8 @@
 package application
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/iki-rumondor/project2-grup9/internal/domain"
 	"github.com/iki-rumondor/project2-grup9/internal/repository"
-	"gorm.io/gorm"
 )
 
 type SocialMediaService struct {
@@ -23,7 +19,7 @@ func (s *SocialMediaService) CreateSocialmedia(sosmed *domain.SocialMedia) (*dom
 
 	result, err := s.Repo.CreateSocialmedia(sosmed)
 	if err != nil {
-		return nil, errors.New("failed to save comment into database")
+		return nil, err
 	}
 
 	return result, nil
@@ -31,9 +27,9 @@ func (s *SocialMediaService) CreateSocialmedia(sosmed *domain.SocialMedia) (*dom
 
 func (s *SocialMediaService) GetSocialMedia(UserID uint) (*[]domain.SocialMedia, error) {
 
-	sosmed, err := s.Repo.FindSocialmedias(UserID)
+	sosmed, err := s.Repo.FindAllUserSocialmedias()
 	if err != nil {
-		return nil, errors.New("failed to get user comment from database")
+		return nil, err
 	}
 
 	return sosmed, nil
@@ -41,20 +37,19 @@ func (s *SocialMediaService) GetSocialMedia(UserID uint) (*[]domain.SocialMedia,
 
 func (s *SocialMediaService) UpdateSocialmedia(sosmed *domain.SocialMedia) (*domain.SocialMedia, error) {
 
-	_, err := s.Repo.FindSocialmedia(sosmed.ID)
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, fmt.Errorf("comment with ID %d not found", sosmed.ID)
-	}
-
-	if err != nil {
-		return nil, errors.New("failed to get comment from the database")
-	}
-
 	updatedsosmed, err := s.Repo.UpdateSocialmedia(sosmed)
 	if err != nil {
-		return nil, errors.New("failed to update comment in the database")
+		return nil, err
 	}
 
 	return updatedsosmed, nil
+}
+
+func (s *SocialMediaService) DeleteSocialMedia(sosmed *domain.SocialMedia) error {
+
+	if err := s.Repo.DeleteSocialmedia(sosmed); err != nil {
+		return err
+	}
+
+	return nil
 }

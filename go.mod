@@ -1,6 +1,6 @@
 module github.com/iki-rumondor/project2-grup9
 
-go 1.23
+go 1.21
 
 require (
 

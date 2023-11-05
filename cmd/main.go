@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/iki-rumondor/project2-grup9/internal/adapter/database"
 	customHTTP "github.com/iki-rumondor/project2-grup9/internal/adapter/http"
@@ -20,7 +21,7 @@ func main() {
 		return
 	}
 
-	// migration(gormDB)
+	// go migration(gormDB)
 
 	userRepo := repository.NewUserRepository(gormDB)
 	userService := application.NewUserService(userRepo)
@@ -29,20 +30,20 @@ func main() {
 	photoRepo := repository.NewPhotoRepository(gormDB)
 	photoService := application.NewPhotoService(photoRepo)
 	photoHandler := customHTTP.NewPhotoHandler(photoService)
-  
-  commentRepo := repository.NewRepository(gormDB)
+
+	commentRepo := repository.NewCommentRepository(gormDB)
 	commentService := application.NewCommentService(commentRepo)
 	commentHandler := customHTTP.NewCommentHandler(commentService)
 
-	socialmediaRepo := repository.NewRepository(gormDB)
+	socialmediaRepo := repository.NewSocialMediaRepository(gormDB)
 	socialmediaService := application.NewSocialMediaService(socialmediaRepo)
 	socialmediaHandler := customHTTP.NewSocialMediaHandler(socialmediaService)
 
 	handlers := customHTTP.Handlers{
-    CommentHandler:     commentHandler,
+		CommentHandler:     commentHandler,
 		SocialMediaHandler: socialmediaHandler,
-		UserHandler:  userHandler,
-		PhotoHandler: photoHandler,
+		UserHandler:        userHandler,
+		PhotoHandler:       photoHandler,
 	}
 
 	utils.NewCustomValidator(gormDB)
@@ -53,14 +54,20 @@ func main() {
 
 func migration(db *gorm.DB) {
 	migrate := db.Debug().Migrator()
-	migrate.DropTable(domain.User{}, domain.Photo{})
-	migrate.CreateTable(domain.User{}, domain.Photo{})
-	// db.Create(domain.User{
-	// 	Age:       12,
-	// 	Email:     "iki@gmail.id",
-	// 	Password:  "123456",
-	// 	Username:  "ilham",
-	// 	CreatedAt: time.Now(),
-	// 	UpdatedAt: time.Now(),
-	// })
+	migrate.DropTable(domain.User{})
+	migrate.DropTable(domain.Photo{})
+	migrate.DropTable(domain.Comment{})
+	migrate.DropTable(domain.SocialMedia{})
+	migrate.CreateTable(domain.User{})
+	migrate.CreateTable(domain.Photo{})
+	migrate.CreateTable(domain.Comment{})
+	migrate.CreateTable(domain.SocialMedia{})
+	db.Create(&domain.User{
+		Age:       12,
+		Email:     "iki@gmail.id",
+		Password:  "123456",
+		Username:  "ilham",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	})
 }

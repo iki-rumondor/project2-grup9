@@ -1,24 +1,47 @@
 package domain
 
-import "time"
+import (
+	"fmt"
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Comment struct {
-	ID           uint      `gorm:"primaryKey" json:"id"`
-	UserID       uint      `json:"user_id"`
-	PhotoID      uint      `json:"photo_id"`
-	Message      string    `json:"message"`
-	Tittle       string    `json:"tittle"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	UserProfile  User      `gorm:"foreignKey:UserID"`
-	PhotoProfile Photo     `gorm:"foreignKey:PhotoID"`
+	ID        uint   `gorm:"primaryKey" json:"id"`
+	Message   string `gorm:"not_null;varchar(120)"`
+	UserID    uint
+	PhotoID   uint
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	User      User
+	Photo     Photo
 }
 
-type UpdateComment struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	Tittle    string    `json:"tittle"`
-	PhotoID   uint      `json:"photo_id"`
-	Message   string    `json:"message"`
-	UserID    uint      `json:"user_id"`
-	UpdatedAt time.Time `json:"updated_at"`
+func (c *Comment) BeforeCreate(tx *gorm.DB) (err error) {
+	if result := tx.First(&Photo{}, "id = ?", c.PhotoID).RowsAffected; result == 0 {
+		return fmt.Errorf("photo with id %d is not found", c.PhotoID)
+	}
+
+	if result := tx.First(&User{}, "id = ?", c.UserID).RowsAffected; result == 0 {
+		return fmt.Errorf("user with id %d is not found", c.UserID)
+	}
+
+	return nil
+}
+
+func (c *Comment) BeforeUpdate(tx *gorm.DB) (err error) {
+	if result := tx.First(&Comment{ID: c.ID}, "user_id = ?", c.UserID).RowsAffected; result == 0 {
+		return fmt.Errorf("your comment with id %d is not found", c.ID)
+	}
+
+	return nil
+}
+
+func (c *Comment) BeforeDelete(tx *gorm.DB) (err error) {
+	if result := tx.First(&Comment{ID: c.ID}, "user_id = ?", c.UserID).RowsAffected; result == 0 {
+		return fmt.Errorf("your comment with id %d is not found", c.ID)
+	}
+
+	return nil
 }

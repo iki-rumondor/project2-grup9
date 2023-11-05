@@ -9,4 +9,5 @@ type SocialMediaRepository interface {
 	DeleteSocialmedia(*domain.SocialMedia) error
 	FindUser(uint) (*domain.User, error)
 	FindSocialmedias(UserID uint) (*[]domain.SocialMedia, error)
+	FindAllUserSocialmedias() (*[]domain.SocialMedia, error)
 }

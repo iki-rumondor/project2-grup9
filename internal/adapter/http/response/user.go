@@ -20,8 +20,15 @@ type UpdatedUser struct {
 }
 
 type UserProfile struct {
+	ID       uint   `gorm:"primaryKey" json:"id"`
 	Email    string `json:"email"`
 	Username string `json:"username"`
+}
+
+type UserSosmed struct {
+	ID              uint   `gorm:"primaryKey" json:"id"`
+	Username        string `json:"username"`
+	ProfileImageUrl string `json:"profile_image_url"`
 }
 
 type JWT struct {

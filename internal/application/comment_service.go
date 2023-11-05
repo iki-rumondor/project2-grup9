@@ -2,11 +2,9 @@ package application
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/iki-rumondor/project2-grup9/internal/domain"
 	"github.com/iki-rumondor/project2-grup9/internal/repository"
-	"gorm.io/gorm"
 )
 
 type CommentService struct {
@@ -23,13 +21,13 @@ func (s *CommentService) CreateComment(comment *domain.Comment) (*domain.Comment
 
 	result, err := s.Repo.CreateComment(comment)
 	if err != nil {
-		return nil, errors.New("failed to save comment into database")
+		return nil, err
 	}
 
 	return result, nil
 }
 
-func (s *CommentService) GetComments(UserID uint) (*[]domain.Comment, error) {
+func (s *CommentService) GetComments(UserID uint) ([]*domain.Comment, error) {
 
 	comment, err := s.Repo.FindComments(UserID)
 	if err != nil {
@@ -39,38 +37,34 @@ func (s *CommentService) GetComments(UserID uint) (*[]domain.Comment, error) {
 	return comment, nil
 }
 
-func (s *CommentService) UpdateComment(comment *domain.UpdateComment) (*domain.Comment, error) {
-	_, err := s.Repo.FindComment(comment.ID)
+func (s *CommentService) GetAllUserComments() ([]*domain.Comment, error) {
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, fmt.Errorf("comment with ID %d not found", comment.ID)
-	}
-
+	comment, err := s.Repo.FindAllUserComments()
 	if err != nil {
-		return nil, errors.New("failed to get comment from the database")
+		return nil, errors.New("failed to get all users comment from database")
 	}
 
-	updatedComment, err := s.Repo.UpdateComment(comment)
+	return comment, nil
+}
+
+func (s *CommentService) UpdateComment(comment *domain.Comment) (*domain.Comment, error) {
+
+	if _, err := s.Repo.UpdateComment(comment); err != nil {
+		return nil, err
+	}
+
+	comment, err := s.Repo.FindComment(comment.ID)
 	if err != nil {
-		return nil, errors.New("failed to update comment in the database")
+		return nil, err
 	}
 
-	return updatedComment, nil
+	return comment, nil
 }
 
 func (s *CommentService) DeleteComment(comment *domain.Comment) error {
 
-	_, err := s.Repo.FindComment(comment.ID)
-
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return fmt.Errorf("comment with id %d id not found", comment.ID)
-	}
-	if err != nil {
-		return errors.New("failed to get comment from database")
-	}
-
 	if err := s.Repo.DeleteComment(comment); err != nil {
-		return errors.New("we encountered an issue while trying to delete the comment")
+		return err
 	}
 
 	return nil
