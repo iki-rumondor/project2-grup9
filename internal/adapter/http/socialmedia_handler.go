@@ -24,7 +24,7 @@ func NewSocialMediaHandler(service *application.SocialMediaService) *SocialMedia
 }
 
 func (h *SocialMediaHandler) CreateSocialmedia(c *gin.Context) {
-	// userID := c.GetUint("user_id")
+	userID := c.GetUint("user_id")
 	defer utils.Recovery(c)
 
 	var body request.SocialMedia
@@ -45,6 +45,7 @@ func (h *SocialMediaHandler) CreateSocialmedia(c *gin.Context) {
 	sosmed := domain.SocialMedia{
 		Name:           body.Name,
 		SocialMediaURL: body.SocialMediaURL,
+		UserID:         userID,
 	}
 
 	result, err := h.Service.CreateSocialmedia(&sosmed)
@@ -55,7 +56,7 @@ func (h *SocialMediaHandler) CreateSocialmedia(c *gin.Context) {
 		return
 	}
 
-	response := response.Socialmedia{
+	response := response.CreateSocialmedia{
 		ID:             result.ID,
 		Name:           result.Name,
 		SocialMediaURL: result.SocialMediaURL,
@@ -70,7 +71,7 @@ func (h *SocialMediaHandler) GetSocialmedia(c *gin.Context) {
 	UserID := c.GetUint("user_id")
 	defer utils.Recovery(c)
 
-	result, err := h.Service.GetSocialMedia(UserID)
+	results, err := h.Service.GetSocialMedia(UserID)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
@@ -78,24 +79,26 @@ func (h *SocialMediaHandler) GetSocialmedia(c *gin.Context) {
 		return
 	}
 
-	var socialmedia response.Sosmed
+	var socialmedia response.Sosmeds
 
-	for _, sosmed := range *result {
-		socialmedia.SocialMedia = append(socialmedia.SocialMedia, &response.Socialmedia{
+	for _, sosmed := range *results {
+		socialmedia.Sosmeds = append(socialmedia.Sosmeds, &response.Sosmed{
 			ID:             sosmed.ID,
 			Name:           sosmed.Name,
 			SocialMediaURL: sosmed.SocialMediaURL,
 			UserID:         sosmed.UserID,
 			CreatedAt:      sosmed.CreatedAt,
 			UpdatedAt:      sosmed.UpdatedAt,
-			User: response.UserProfiles{
-				// ID:    sosmed.UserProfiles.ID,
-				// Email: sosmed.UserProfiles.Email,
+			User: &response.UserSosmed{
+				ID:       sosmed.User.ID,
+				Username: sosmed.User.Username,
 			},
 		})
 	}
 
-	c.JSON(http.StatusOK, socialmedia.SocialMedia)
+	c.JSON(http.StatusOK, gin.H{
+		"social_medias": socialmedia.Sosmeds,
+	})
 }
 
 func (h *SocialMediaHandler) UpdateSocialmedia(c *gin.Context) {
@@ -115,7 +118,7 @@ func (h *SocialMediaHandler) UpdateSocialmedia(c *gin.Context) {
 	}
 
 	urlParam := c.Param("id")
-	_, err := strconv.Atoi(urlParam)
+	id, err := strconv.Atoi(urlParam)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, response.Message{
 			Message: "please check the url and ensure it follows the correct format",
@@ -123,9 +126,13 @@ func (h *SocialMediaHandler) UpdateSocialmedia(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetUint("user_id")
+
 	sosmed := domain.SocialMedia{
+		ID:             uint(id),
 		Name:           body.Name,
 		SocialMediaURL: body.SocialMediaURL,
+		UserID:         userID,
 	}
 
 	result, err := h.Service.UpdateSocialmedia(&sosmed)
@@ -136,12 +143,12 @@ func (h *SocialMediaHandler) UpdateSocialmedia(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.Socialmedia{
+	c.JSON(http.StatusOK, response.UpdateSosmed{
 		ID:             result.ID,
 		Name:           result.Name,
 		SocialMediaURL: result.SocialMediaURL,
 		UserID:         result.UserID,
-		CreatedAt:      result.CreatedAt,
+		UpdatedAt:      result.UpdatedAt,
 	})
 }
 
@@ -155,8 +162,10 @@ func (h *SocialMediaHandler) DeleteSocialmedia(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetUint("user_id")
 	sosmed := domain.SocialMedia{
-		ID: uint(sosmedID),
+		ID:     uint(sosmedID),
+		UserID: userID,
 	}
 
 	if err := h.Service.DeleteSocialMedia(&sosmed); err != nil {

@@ -31,16 +31,16 @@ func (c *Comment) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (c *Comment) BeforeUpdate(tx *gorm.DB) (err error) {
-	if result := tx.First(&Comment{ID: c.ID}).RowsAffected; result == 0 {
-		return fmt.Errorf("comment with id %d is not found", c.ID)
+	if result := tx.First(&Comment{ID: c.ID}, "user_id = ?", c.UserID).RowsAffected; result == 0 {
+		return fmt.Errorf("your comment with id %d is not found", c.ID)
 	}
 
 	return nil
 }
 
 func (c *Comment) BeforeDelete(tx *gorm.DB) (err error) {
-	if result := tx.First(&Comment{ID: c.ID}).RowsAffected; result == 0 {
-		return fmt.Errorf("comment with id %d is not found", c.ID)
+	if result := tx.First(&Comment{ID: c.ID}, "user_id = ?", c.UserID).RowsAffected; result == 0 {
+		return fmt.Errorf("your comment with id %d is not found", c.ID)
 	}
 
 	return nil

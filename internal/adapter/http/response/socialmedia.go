@@ -2,35 +2,32 @@ package response
 
 import "time"
 
-// type CreateSocialmedia struct {
-// 	ID             uint   `gorm:"primaryKey" json:"id"`
-// 	Name           string `json:"name"`
-// 	SocialMediaURL string `json:"social_media_url"`
-// 	UserID         uint   `json:"user_id"`
-// 	CreatedAd      time.Time
-// }
-
-type UserProfiles struct {
-	ID              uint   `gorm:"primaryKey" json:"id"`
-	Email           string `json:"email"`
-	Username        string `json:"username"`
-	ProfileImageURL string `json:"profile_image_url"`
+type CreateSocialmedia struct {
+	ID             uint      `json:"id"`
+	Name           string    `json:"name"`
+	SocialMediaURL string    `json:"social_media_url"`
+	UserID         uint      `json:"user_id"`
+	CreatedAt      time.Time `json:"created_at"`
 }
 
-type Socialmedia struct {
-	ID             uint      `gorm:"primaryKey" json:"id"`
+type UpdateSosmed struct {
+	ID             uint      `json:"id"`
+	Name           string    `json:"name"`
+	SocialMediaURL string    `json:"social_media_url"`
+	UserID         uint      `json:"user_id"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
+type Sosmed struct {
+	ID             uint      `json:"id"`
 	Name           string    `json:"name"`
 	SocialMediaURL string    `json:"social_media_url"`
 	UserID         uint      `json:"user_id"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
-	User           UserProfiles
+	User     *UserSosmed
 }
 
-type Sosmed struct {
-	SocialMedia []*Socialmedia
+type Sosmeds struct {
+	Sosmeds []*Sosmed
 }
-
-// type UpdateSocialmedia struct{
-
-// }

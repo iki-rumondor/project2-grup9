@@ -90,10 +90,12 @@ func (h *PhotoHandler) GetPhotos(c *gin.Context) {
 			ID:        photo.ID,
 			Title:     photo.Title,
 			Caption:   photo.Caption,
+			PhotoUrl:  photo.PhotoUrl,
 			UserID:    photo.UserID,
 			CreatedAt: photo.CreatedAt,
 			UpdatedAt: photo.UpdatedAt,
 			User: response.UserProfile{
+				ID:       photo.UserProfile.ID,
 				Email:    photo.UserProfile.Email,
 				Username: photo.UserProfile.Username,
 			},
@@ -128,12 +130,14 @@ func (h *PhotoHandler) UpdatePhoto(c *gin.Context) {
 		})
 		return
 	}
+	userID := c.GetUint("user_id")
 
-	photo := domain.UpdatePhoto{
+	photo := domain.Photo{
 		ID:       uint(photoID),
 		Title:    body.Title,
 		Caption:  body.Caption,
 		PhotoUrl: body.PhotoUrl,
+		UserID:   userID,
 	}
 
 	result, err := h.Service.UpdatePhoto(&photo)
@@ -165,8 +169,11 @@ func (h *PhotoHandler) DeletePhoto(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetUint("user_id")
+
 	photo := domain.Photo{
-		ID: uint(photoID),
+		ID:     uint(photoID),
+		UserID: userID,
 	}
 
 	if err := h.Service.DeletePhoto(&photo); err != nil {

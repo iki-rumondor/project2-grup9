@@ -25,6 +25,12 @@ type UserProfile struct {
 	Username string `json:"username"`
 }
 
+type UserSosmed struct {
+	ID              uint   `gorm:"primaryKey" json:"id"`
+	Username        string `json:"username"`
+	ProfileImageUrl string `json:"profile_image_url"`
+}
+
 type JWT struct {
 	Token string `json:"token"`
 }

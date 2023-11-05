@@ -38,5 +38,13 @@ func StartServer(handler *customHTTP.Handlers) *gin.Engine {
 		comments.DELETE("/:id", handler.CommentHandler.DeleteComment)
 	}
 
+	sosmed := router.Group("socialmedias").Use(middleware.ValidateHeader(), middleware.GetUserID())
+	{
+		sosmed.POST("/", handler.SocialMediaHandler.CreateSocialmedia)
+		sosmed.GET("/", handler.SocialMediaHandler.GetSocialmedia)
+		sosmed.PUT("/:id", handler.SocialMediaHandler.UpdateSocialmedia)
+		sosmed.DELETE("/:id", handler.SocialMediaHandler.DeleteSocialmedia)
+	}
+
 	return router
 }

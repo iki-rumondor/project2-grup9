@@ -16,16 +16,16 @@ func NewSocialMediaRepository(db *gorm.DB) SocialMediaRepository {
 }
 
 func (r *SocialMediaRepoImplementation) CreateSocialmedia(socialmedia *domain.SocialMedia) (*domain.SocialMedia, error) {
-	if err := r.db.Create(&socialmedia).Error; err != nil {
+	if err := r.db.Save(&socialmedia).Error; err != nil {
 		return nil, err
 	}
 	return socialmedia, nil
 }
 
-func (r *SocialMediaRepoImplementation) FindSocialmedia(socialmediaID uint) (*domain.SocialMedia, error) {
+func (r *SocialMediaRepoImplementation) FindSocialmedia(userID uint) (*domain.SocialMedia, error) {
 	var sosmed domain.SocialMedia
 
-	if err := r.db.First(&sosmed, "id = ?", socialmediaID).Error; err != nil {
+	if err := r.db.Preload("User").Find(&sosmed, "userID = ?", userID).Error; err != nil {
 		return nil, err
 	}
 
@@ -34,7 +34,7 @@ func (r *SocialMediaRepoImplementation) FindSocialmedia(socialmediaID uint) (*do
 
 func (r *SocialMediaRepoImplementation) UpdateSocialmedia(socialmedia *domain.SocialMedia) (*domain.SocialMedia, error) {
 	var result domain.SocialMedia
-	if err := r.db.Model(&domain.SocialMedia{}).Where("id = ?", socialmedia.ID).Updates(&socialmedia).First(&result).Error; err != nil {
+	if err := r.db.Model(&socialmedia).Updates(&socialmedia).First(&result).Error; err != nil {
 		return nil, err
 	}
 	return &result, nil
@@ -58,7 +58,16 @@ func (r *SocialMediaRepoImplementation) FindUser(id uint) (*domain.User, error) 
 
 func (r *SocialMediaRepoImplementation) FindSocialmedias(UserID uint) (*[]domain.SocialMedia, error) {
 	var sosmed []domain.SocialMedia
-	if err := r.db.Preload("UserProfile").Find(&sosmed, "user_id = ?", UserID).Error; err != nil {
+	if err := r.db.Preload("User").Find(&sosmed, "user_id = ?", UserID).Error; err != nil {
+		return nil, err
+	}
+
+	return &sosmed, nil
+}
+
+func (r *SocialMediaRepoImplementation) FindAllUserSocialmedias() (*[]domain.SocialMedia, error) {
+	var sosmed []domain.SocialMedia
+	if err := r.db.Preload("User").Find(&sosmed).Error; err != nil {
 		return nil, err
 	}
 
