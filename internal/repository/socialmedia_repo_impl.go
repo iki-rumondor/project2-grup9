@@ -47,15 +47,6 @@ func (r *SocialMediaRepoImplementation) DeleteSocialmedia(socialmedia *domain.So
 	return nil
 }
 
-func (r *SocialMediaRepoImplementation) FindUser(id uint) (*domain.User, error) {
-	var user domain.User
-	if err := r.db.First(&user, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
-
 func (r *SocialMediaRepoImplementation) FindSocialmedias(UserID uint) (*[]domain.SocialMedia, error) {
 	var sosmed []domain.SocialMedia
 	if err := r.db.Preload("User").Find(&sosmed, "user_id = ?", UserID).Error; err != nil {
@@ -65,11 +56,3 @@ func (r *SocialMediaRepoImplementation) FindSocialmedias(UserID uint) (*[]domain
 	return &sosmed, nil
 }
 
-func (r *SocialMediaRepoImplementation) FindAllUserSocialmedias() (*[]domain.SocialMedia, error) {
-	var sosmed []domain.SocialMedia
-	if err := r.db.Preload("User").Find(&sosmed).Error; err != nil {
-		return nil, err
-	}
-
-	return &sosmed, nil
-}

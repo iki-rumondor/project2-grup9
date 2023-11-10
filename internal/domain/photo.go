@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -21,24 +20,24 @@ type Photo struct {
 }
 
 func (p *Photo) BeforeCreate(tx *gorm.DB) (err error) {
-	if result := tx.First(&User{ID: p.UserID}).RowsAffected; result == 0 {
-		return fmt.Errorf("user with id %d is not found", p.UserID)
+	if err := tx.First(&User{}, "id = ?", p.UserID).Error; err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (p *Photo) BeforeUpdate(tx *gorm.DB) (err error) {
-	if result := tx.First(&Photo{ID: p.ID}, "user_id = ?", p.UserID).RowsAffected; result == 0 {
-		return fmt.Errorf("your photo with id %d is not found", p.ID)
+	if err := tx.First(&Photo{}, "id = ? AND user_id = ?", p.ID, p.UserID).Error; err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (p *Photo) BeforeDelete(tx *gorm.DB) (err error) {
-	if result := tx.First(&Photo{ID: p.ID}, "user_id = ?", p.UserID).RowsAffected; result == 0 {
-		return fmt.Errorf("your photo with id %d is not found", p.ID)
+	if err := tx.First(&Photo{}, "id = ? AND user_id = ?", p.ID, p.UserID).Error; err != nil {
+		return err
 	}
 
 	return nil

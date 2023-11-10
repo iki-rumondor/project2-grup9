@@ -1,6 +1,7 @@
 package customHTTP
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -10,7 +11,7 @@ import (
 	"github.com/iki-rumondor/project2-grup9/internal/adapter/http/response"
 	"github.com/iki-rumondor/project2-grup9/internal/application"
 	"github.com/iki-rumondor/project2-grup9/internal/domain"
-	"github.com/iki-rumondor/project2-grup9/internal/utils"
+	"gorm.io/gorm"
 )
 
 type CommentHandler struct {
@@ -25,7 +26,6 @@ func NewCommentHandler(service *application.CommentService) *CommentHandler {
 
 func (h *CommentHandler) CreateComment(c *gin.Context) {
 	userID := c.GetUint("user_id")
-	defer utils.Recovery(c)
 
 	var body request.Comment
 	if err := c.BindJSON(&body); err != nil {
@@ -49,7 +49,16 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 	}
 
 	result, err := h.Service.CreateComment(&comment)
+
 	if err != nil {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, response.Message{
+				Message: err.Error(),
+			})
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})
@@ -70,7 +79,6 @@ func (h *CommentHandler) CreateComment(c *gin.Context) {
 func (h *CommentHandler) GetComments(c *gin.Context) {
 
 	UserID := c.GetUint("user_id")
-	defer utils.Recovery(c)
 
 	result, err := h.Service.GetComments(UserID)
 	if err != nil {
@@ -80,7 +88,7 @@ func (h *CommentHandler) GetComments(c *gin.Context) {
 		return
 	}
 
-	var comments response.Comments
+	var comments = response.Comments{}
 
 	for _, comment := range result {
 		comments.Comments = append(comments.Comments, &response.Comment{
@@ -141,7 +149,16 @@ func (h *CommentHandler) UpdateComment(c *gin.Context) {
 	}
 
 	result, err := h.Service.UpdateComment(&comment)
+
 	if err != nil {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, response.Message{
+				Message: err.Error(),
+			})
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})
@@ -173,6 +190,14 @@ func (h *CommentHandler) DeleteComment(c *gin.Context) {
 	}
 
 	if err := h.Service.DeleteComment(&comment); err != nil {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, response.Message{
+				Message: err.Error(),
+			})
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})

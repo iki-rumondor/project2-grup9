@@ -37,23 +37,9 @@ func (s *CommentService) GetComments(UserID uint) ([]*domain.Comment, error) {
 	return comment, nil
 }
 
-func (s *CommentService) GetAllUserComments() ([]*domain.Comment, error) {
-
-	comment, err := s.Repo.FindAllUserComments()
-	if err != nil {
-		return nil, errors.New("failed to get all users comment from database")
-	}
-
-	return comment, nil
-}
-
 func (s *CommentService) UpdateComment(comment *domain.Comment) (*domain.Comment, error) {
 
-	if _, err := s.Repo.UpdateComment(comment); err != nil {
-		return nil, err
-	}
-
-	comment, err := s.Repo.FindComment(comment.ID)
+	comment, err := s.Repo.UpdateComment(comment)
 	if err != nil {
 		return nil, err
 	}
