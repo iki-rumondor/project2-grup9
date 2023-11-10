@@ -1,6 +1,7 @@
 package customHTTP
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -10,7 +11,7 @@ import (
 	"github.com/iki-rumondor/project2-grup9/internal/adapter/http/response"
 	"github.com/iki-rumondor/project2-grup9/internal/application"
 	"github.com/iki-rumondor/project2-grup9/internal/domain"
-	"github.com/iki-rumondor/project2-grup9/internal/utils"
+	"gorm.io/gorm"
 )
 
 type SocialMediaHandler struct {
@@ -25,7 +26,6 @@ func NewSocialMediaHandler(service *application.SocialMediaService) *SocialMedia
 
 func (h *SocialMediaHandler) CreateSocialmedia(c *gin.Context) {
 	userID := c.GetUint("user_id")
-	defer utils.Recovery(c)
 
 	var body request.SocialMedia
 	if err := c.BindJSON(&body); err != nil {
@@ -49,7 +49,15 @@ func (h *SocialMediaHandler) CreateSocialmedia(c *gin.Context) {
 	}
 
 	result, err := h.Service.CreateSocialmedia(&sosmed)
+
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, response.Message{
+				Message: err.Error(),
+			})
+			return
+		}
+		
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})
@@ -69,7 +77,6 @@ func (h *SocialMediaHandler) CreateSocialmedia(c *gin.Context) {
 
 func (h *SocialMediaHandler) GetSocialmedia(c *gin.Context) {
 	UserID := c.GetUint("user_id")
-	defer utils.Recovery(c)
 
 	results, err := h.Service.GetSocialMedia(UserID)
 	if err != nil {
@@ -79,7 +86,7 @@ func (h *SocialMediaHandler) GetSocialmedia(c *gin.Context) {
 		return
 	}
 
-	var socialmedia response.Sosmeds
+	var socialmedia = response.Sosmeds{}
 
 	for _, sosmed := range *results {
 		socialmedia.Sosmeds = append(socialmedia.Sosmeds, &response.Sosmed{
@@ -136,7 +143,16 @@ func (h *SocialMediaHandler) UpdateSocialmedia(c *gin.Context) {
 	}
 
 	result, err := h.Service.UpdateSocialmedia(&sosmed)
+
 	if err != nil {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, response.Message{
+				Message: err.Error(),
+			})
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})
@@ -169,6 +185,14 @@ func (h *SocialMediaHandler) DeleteSocialmedia(c *gin.Context) {
 	}
 
 	if err := h.Service.DeleteSocialMedia(&sosmed); err != nil {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, response.Message{
+				Message: err.Error(),
+			})
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})

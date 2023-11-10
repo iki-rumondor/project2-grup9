@@ -1,6 +1,7 @@
 package customHTTP
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -10,7 +11,7 @@ import (
 	"github.com/iki-rumondor/project2-grup9/internal/adapter/http/response"
 	"github.com/iki-rumondor/project2-grup9/internal/application"
 	"github.com/iki-rumondor/project2-grup9/internal/domain"
-	"github.com/iki-rumondor/project2-grup9/internal/utils"
+	"gorm.io/gorm"
 )
 
 type PhotoHandler struct {
@@ -26,7 +27,6 @@ func NewPhotoHandler(service *application.PhotoService) *PhotoHandler {
 func (h *PhotoHandler) CreatePhoto(c *gin.Context) {
 
 	userID := c.GetUint("user_id")
-	defer utils.Recovery(c)
 
 	var body request.Photo
 	if err := c.BindJSON(&body); err != nil {
@@ -51,7 +51,16 @@ func (h *PhotoHandler) CreatePhoto(c *gin.Context) {
 	}
 
 	result, err := h.Service.CreatePhoto(&photo)
+
 	if err != nil {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, response.Message{
+				Message: err.Error(),
+			})
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})
@@ -73,7 +82,6 @@ func (h *PhotoHandler) CreatePhoto(c *gin.Context) {
 func (h *PhotoHandler) GetPhotos(c *gin.Context) {
 
 	userID := c.GetUint("user_id")
-	defer utils.Recovery(c)
 
 	result, err := h.Service.GetPhotos(userID)
 	if err != nil {
@@ -83,7 +91,7 @@ func (h *PhotoHandler) GetPhotos(c *gin.Context) {
 		return
 	}
 
-	var photos response.Photos
+	var photos = response.Photos{}
 
 	for _, photo := range *result {
 		photos.Photos = append(photos.Photos, &response.Photo{
@@ -141,7 +149,16 @@ func (h *PhotoHandler) UpdatePhoto(c *gin.Context) {
 	}
 
 	result, err := h.Service.UpdatePhoto(&photo)
+
 	if err != nil {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, response.Message{
+				Message: err.Error(),
+			})
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})
@@ -176,7 +193,15 @@ func (h *PhotoHandler) DeletePhoto(c *gin.Context) {
 		UserID: userID,
 	}
 
-	if err := h.Service.DeletePhoto(&photo); err != nil {
+	if err = h.Service.DeletePhoto(&photo); err != nil {
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, response.Message{
+				Message: err.Error(),
+			})
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, response.Message{
 			Message: err.Error(),
 		})

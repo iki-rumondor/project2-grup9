@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -19,28 +18,28 @@ type Comment struct {
 }
 
 func (c *Comment) BeforeCreate(tx *gorm.DB) (err error) {
-	if result := tx.First(&Photo{}, "id = ?", c.PhotoID).RowsAffected; result == 0 {
-		return fmt.Errorf("photo with id %d is not found", c.PhotoID)
+	if err := tx.First(&Photo{}, "id = ?", c.PhotoID).Error; err != nil {
+		return err
 	}
 
-	if result := tx.First(&User{}, "id = ?", c.UserID).RowsAffected; result == 0 {
-		return fmt.Errorf("user with id %d is not found", c.UserID)
+	if err := tx.First(&User{}, "id = ?", c.UserID).Error; err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (c *Comment) BeforeUpdate(tx *gorm.DB) (err error) {
-	if result := tx.First(&Comment{ID: c.ID}, "user_id = ?", c.UserID).RowsAffected; result == 0 {
-		return fmt.Errorf("your comment with id %d is not found", c.ID)
+	if err := tx.First(&Comment{}, "id = ? AND user_id = ?", c.ID, c.UserID).Error; err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (c *Comment) BeforeDelete(tx *gorm.DB) (err error) {
-	if result := tx.First(&Comment{ID: c.ID}, "user_id = ?", c.UserID).RowsAffected; result == 0 {
-		return fmt.Errorf("your comment with id %d is not found", c.ID)
+	if err := tx.First(&Comment{}, "id = ? AND user_id = ?", c.ID, c.UserID).Error; err != nil {
+		return err
 	}
 
 	return nil

@@ -29,7 +29,7 @@ func (s *PhotoService) CreatePhoto(photo *domain.Photo) (*domain.Photo, error) {
 
 func (s *PhotoService) GetPhotos(userID uint) (*[]domain.Photo, error) {
 
-	photos, err := s.Repo.FindAllUserPhotos()
+	photos, err := s.Repo.FindPhotos(userID)
 	if err != nil {
 		return nil, errors.New("failed to get user photos from database")
 	}
