@@ -37,16 +37,6 @@ func (s *PhotoService) GetPhotos(userID uint) (*[]domain.Photo, error) {
 	return photos, nil
 }
 
-func (s *PhotoService) GetAllUserPhotos() (*[]domain.Photo, error) {
-
-	photos, err := s.Repo.FindAllUserPhotos()
-	if err != nil {
-		return nil, errors.New("failed to get all users photos from database")
-	}
-
-	return photos, nil
-}
-
 func (s *PhotoService) UpdatePhoto(photo *domain.Photo) (*domain.Photo, error) {
 
 	photos, err := s.Repo.Update(photo)

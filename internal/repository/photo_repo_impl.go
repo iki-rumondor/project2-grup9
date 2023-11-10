@@ -38,15 +38,6 @@ func (r *PhotoRepoImplementation) Update(photo *domain.Photo) (*domain.Photo, er
 	return &result, nil
 }
 
-func (r *PhotoRepoImplementation) FindUser(id uint) (*domain.User, error) {
-	var user domain.User
-	if err := r.db.First(&user, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-
-	return &user, nil
-}
-
 func (r *PhotoRepoImplementation) FindPhotos(userID uint) (*[]domain.Photo, error) {
 	var photos []domain.Photo
 	if err := r.db.Preload("UserProfile").Find(&photos, "user_id = ?", userID).Error; err != nil {
@@ -54,22 +45,4 @@ func (r *PhotoRepoImplementation) FindPhotos(userID uint) (*[]domain.Photo, erro
 	}
 
 	return &photos, nil
-}
-
-func (r *PhotoRepoImplementation) FindAllUserPhotos() (*[]domain.Photo, error) {
-	var photos []domain.Photo
-	if err := r.db.Preload("UserProfile").Find(&photos).Error; err != nil {
-		return nil, err
-	}
-
-	return &photos, nil
-}
-
-func (r *PhotoRepoImplementation) FindPhoto(photoID uint) (*domain.Photo, error) {
-	var photo domain.Photo
-	if err := r.db.First(&photo, "id = ?", photoID).Error; err != nil {
-		return nil, err
-	}
-
-	return &photo, nil
 }

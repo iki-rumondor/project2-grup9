@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"time"
+	"os"
 
 	"github.com/iki-rumondor/project2-grup9/internal/adapter/database"
 	customHTTP "github.com/iki-rumondor/project2-grup9/internal/adapter/http"
@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	gormDB, err := database.NewMysqlDB()
+	gormDB, err := database.NewPostgresDB()
 	if err != nil {
 		log.Fatal(err.Error())
 		return
@@ -48,8 +48,15 @@ func main() {
 
 	utils.NewCustomValidator(gormDB)
 
-	var PORT = ":8080"
+	var PORT = envPortOr("3000")
 	routes.StartServer(&handlers).Run(PORT)
+}
+
+func envPortOr(port string) string {
+	if envPort := os.Getenv("PORT"); envPort != "" {
+		return ":" + envPort
+	}
+	return ":" + port
 }
 
 func migration(db *gorm.DB) {
@@ -62,12 +69,4 @@ func migration(db *gorm.DB) {
 	migrate.CreateTable(domain.Photo{})
 	migrate.CreateTable(domain.Comment{})
 	migrate.CreateTable(domain.SocialMedia{})
-	db.Create(&domain.User{
-		Age:       12,
-		Email:     "iki@gmail.id",
-		Password:  "123456",
-		Username:  "ilham",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	})
 }

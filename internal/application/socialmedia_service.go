@@ -27,7 +27,7 @@ func (s *SocialMediaService) CreateSocialmedia(sosmed *domain.SocialMedia) (*dom
 
 func (s *SocialMediaService) GetSocialMedia(UserID uint) (*[]domain.SocialMedia, error) {
 
-	sosmed, err := s.Repo.FindAllUserSocialmedias()
+	sosmed, err := s.Repo.FindSocialmedias(UserID)
 	if err != nil {
 		return nil, err
 	}
